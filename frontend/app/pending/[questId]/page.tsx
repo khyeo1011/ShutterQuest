@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { CameraButton } from "@/app/[questId]/components/camera-button"
+import { CameraButton } from "@/app/pending/[questId]/components/camera-button"
 import { getPendingQuests } from "@/lib/api"
 import { useRouter } from "next/navigation"
 import { use, useState } from "react"

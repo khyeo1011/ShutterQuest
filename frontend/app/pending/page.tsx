@@ -10,7 +10,7 @@ export default function PendingPage() {
   const router = useRouter()
 
   const handleQuestClick = (questId: string) => {
-    router.push(`/${questId}`)
+    router.push(`/pending/${questId}`)
   }
 
   return (
