@@ -19,8 +19,17 @@ export function getPendingQuests(userId: string) {
     return sample
 }
 
-function getCompletedQuests(userId: string) {
-    return
+export function getCompletedQuests(userId: string) {
+    const sample = 
+        [
+            { questId: "1", prompt: "test", hostId: "testHost1" },
+            { questId: "2", prompt: "test", hostId: "testHost2" },
+            { questId: "3", prompt: "test", hostId: "testHost3" },
+            { questId: "4", prompt: "test", hostId: "testHost4" },
+            { questId: "5", prompt: "test", hostId: "testHost5" },
+        ]
+
+    return sample
 }
 
 function createQuest(prompt: string, hostId: string, userIds: string[], image: any, time: number) {
@@ -33,4 +42,10 @@ function getPrompt() {
 
 function completeQuest(questId: string, userId: string, image: any, time: number) {
     return
+}
+
+function getQuestDetails(questId: string) {
+    return [
+        { questId: "1", prompt: "test", hostId: "testHost1" },
+    ]
 }
