@@ -75,21 +75,49 @@ def login():
 def get_pending_quests():
     user_id = request.args.get('userID')
 
-    # TODO: Call DBHelper to get pending quests
+    if not user_id:
+        return jsonify({
+            'message': 'userID is required'
+        }), 400
+
+    result = db_helper.get_quest_pending(user_id)
     
-    return jsonify({
-        'quests': []
-    }), 200
+    if not result:
+        return jsonify({'quests': []}), 200
+    
+    formatted_quests = []
+    for row in result:
+        formatted_quests.append({
+            'quest_id': row.get('questid'),
+            'prompt': row.get('prompt'),
+            'host_id': row.get('hostid')
+        })
+    
+    return jsonify({'quests': formatted_quests}), 200
 
 @app.route('/api/completed-quests', methods=['GET'])
 def get_completed_quests():
     user_id = request.args.get('userID')
 
-    # TODO: Call DBHelper to get completed quests
+    if not user_id:
+        return jsonify({
+            'message': 'userID is required'
+        }), 400
+
+    result = db_helper.get_quest_completed(user_id)
     
-    return jsonify({
-        'quests': []
-    }), 200
+    if not result:
+        return jsonify({'quests': []}), 200
+    
+    formatted_quests = []
+    for row in result:
+        formatted_quests.append({
+            'quest_id': row.get('questid'),
+            'prompt': row.get('prompt'),
+            'host_id': row.get('hostid')
+        })
+    
+    return jsonify({'quests': formatted_quests}), 200
 
 @app.route('/api/create-quest', methods=['POST'])
 def create_quest():
