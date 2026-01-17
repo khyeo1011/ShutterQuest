@@ -35,14 +35,14 @@ class DBHelper:
         response = self.client.table("quests").select("*, participants(*)").eq("questid", quest_id).execute()
         return response.data[0] if response.data else {}
     
-    def get_quest_pending(self, user_id: str) -> Optional[Dict[str, Any]]:
+    def get_quests_pending(self, user_id: str) -> List[Dict[str, Any]]:
         p1_response = self.client.table("participants") \
             .select("*") \
             .eq("userid", user_id) \
             .execute()
         
         if not p1_response.data:
-            return None
+            return []
 
         user_quest_ids = [row['questid'] for row in p1_response.data]
 
@@ -54,23 +54,19 @@ class DBHelper:
             
         active_quest_ids = {row['questid'] for row in p2_response.data}
 
-        for row in p1_response.data:
-            if row['questid'] in active_quest_ids:
-                return row
-                
-        return None
+        return [row for row in p1_response.data if row['questid'] in active_quest_ids]
     
-    def get_quest_completed(self, user_id: str) -> Optional[Dict[str, Any]]:
+    def get_quests_completed(self, user_id: str) -> List[Dict[str, Any]]:
         p1_response = self.client.table("participants") \
             .select("*") \
             .eq("userid", user_id) \
             .execute()
 
         if not p1_response.data:
-            return None
+            return []
 
         user_quest_ids = [row['questid'] for row in p1_response.data]
-
+        
         incomplete_response = self.client.table("participants") \
             .select("questid") \
             .in_("questid", user_quest_ids) \
@@ -79,8 +75,4 @@ class DBHelper:
 
         incomplete_quest_ids = {row['questid'] for row in incomplete_response.data}
 
-        for row in p1_response.data:
-            if row['questid'] not in incomplete_quest_ids:
-                return row
-
-        return None
+        return [row for row in p1_response.data if row['questid'] not in incomplete_quest_ids]
