@@ -1,6 +1,6 @@
 import { Quest, QuestDetails } from "@/types/types"
 
-const url = "http://127.0.0.1:5000"
+const url = process.env.NEXT_PUBLIC_URL || "http://127.0.0.1:5000"
 
 export async function register(userId: string, password: string) {
     const response = await fetch(url + "/api/register", {
