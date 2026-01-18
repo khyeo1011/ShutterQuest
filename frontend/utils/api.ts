@@ -28,7 +28,11 @@ export async function login(userId: string, password: string) {
 
 export async function getPendingQuests(userId: string) : Promise<Quest[]> {
     const response = await fetch(url + `/api/pending-quests?userId=${userId}`,{
-        method: "GET"
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json",
+            "ngrok-skip-browser-warning": "true",
+        },
         })
     const data = await response.json();
 
@@ -37,7 +41,11 @@ export async function getPendingQuests(userId: string) : Promise<Quest[]> {
 
 export async function getCompletedQuests(userId: string): Promise<Quest[]> {
     const response = await fetch(url + `/api/completed-quests?userId=${userId}`,{
-        method: "GET"
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json",
+            "ngrok-skip-browser-warning": "true",
+        },
         })
     const data = await response.json();
     
