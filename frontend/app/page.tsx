@@ -3,12 +3,21 @@
 import { Button } from "@/components/ui/button"
 import { useRouter } from "next/navigation"
 import { useAuth } from "@/contexts/AuthContext"
-import { useEffect } from "react"
+import { useEffect, useRef } from "react"
 import { getPoints } from "@/utils/api"
 
 export default function Page() {
   const router = useRouter()
   const { userId, logout, points, setPoints } = useAuth()
+  const prevPointsRef = useRef(points);
+
+  useEffect(() => {
+    if (points > prevPointsRef.current) {
+      const audio = new Audio('/increase.mp3');
+      audio.play();
+    }
+    prevPointsRef.current = points;
+  }, [points]);
 
   useEffect(() => {
     if (userId) {
