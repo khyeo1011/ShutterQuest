@@ -4,40 +4,27 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { CameraButton } from "@/app/pending/[questId]/components/camera-button"
-import { getPrompt, getUser } from "@/utils/api"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
+import { getUser } from "@/utils/api"
 import { useRouter } from "next/navigation"
-import { useState, useEffect } from "react"
+import { useState } from "react"
 
 export default function CreatePage() {
     const router = useRouter()
-    const [prompt, setPrompt] = useState<string>("")
-    const [loading, setLoading] = useState(true)
-    const [capturedImage, setCapturedImage] = useState<string | null>(null)
     const [invitedUsers, setInvitedUsers] = useState<string[]>([])
     const [currentUserId, setCurrentUserId] = useState<string>("")
     const [addingUser, setAddingUser] = useState(false)
     const [userError, setUserError] = useState<string>("")
-
-    useEffect(() => {
-        const fetchPrompt = async () => {
-            try {
-                const response = await getPrompt()
-                setPrompt(response.prompt)
-            } catch (error) {
-                console.error("Failed to fetch prompt:", error)
-                setPrompt("Failed to load prompt")
-            } finally {
-                setLoading(false)
-            }
-        }
-
-        fetchPrompt()
-    }, [])
-
-    const handleImageCapture = (imageData: string) => {
-        setCapturedImage(imageData)
-    }
+    const [isDialogOpen, setIsDialogOpen] = useState(false)
 
     const handleAddUser = async () => {
         if (!currentUserId.trim()) {
@@ -75,11 +62,18 @@ export default function CreatePage() {
         setInvitedUsers(invitedUsers.filter(id => id !== userId))
     }
 
-    const handleCreateQuest = () => {
-        if (!capturedImage) return
-        console.log("Creating quest with image:", capturedImage.substring(0, 50) + "...")
-        console.log("Inviting users:", invitedUsers)
-        // TODO: Implement quest creation logic
+    const handleStartQuestClick = () => {
+        setIsDialogOpen(true)
+    }
+
+    const handleConfirm = () => {
+        setIsDialogOpen(false)
+        // Pass invited users to the quest page via state
+        router.push(`/create/quest?invitedUsers=${encodeURIComponent(JSON.stringify(invitedUsers))}`)
+    }
+
+    const handleCancel = () => {
+        setIsDialogOpen(false)
     }
 
     return (
@@ -95,104 +89,91 @@ export default function CreatePage() {
 
                 <Card>
                     <CardHeader>
-                        <CardTitle>Create Quest</CardTitle>
-                        <CardDescription>Take a photo of the prompt and invite friends</CardDescription>
+                        <CardTitle>Invite Friends</CardTitle>
+                        <CardDescription>Add friends to your quest before starting</CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-4">
-                        {loading ? (
-                            <p className="text-center text-muted-foreground">Loading prompt...</p>
-                        ) : (
-                            <div className="p-6 bg-muted rounded-lg">
-                                <p className="text-lg font-medium text-center">{prompt}</p>
-                            </div>
-                        )}
-
-                        <div className="pt-4 flex flex-col items-center space-y-4">
-                            <div className="w-full aspect-[4/3] bg-muted rounded-lg border overflow-hidden">
-                                {capturedImage ? (
-                                    <img 
-                                        src={capturedImage} 
-                                        alt="Captured" 
-                                        className="w-full h-full object-cover"
-                                    />
-                                ) : (
-                                    <div className="w-full h-full flex items-center justify-center text-muted-foreground">
-                                        No photo taken yet
-                                    </div>
-                                )}
-                            </div>
-
-                            <div className="w-full space-y-3">
-                                <Label htmlFor="inviteUsers">Invite Users</Label>
-                                
-                                {/* Invited users list */}
-                                {invitedUsers.length > 0 && (
-                                    <div className="space-y-2">
-                                        {invitedUsers.map((userId) => (
-                                            <div 
-                                                key={userId} 
-                                                className="flex items-center justify-between p-2 bg-muted rounded-md"
+                        <div className="w-full space-y-3">
+                            <Label htmlFor="inviteUsers">Invite Users</Label>
+                            
+                            {/* Invited users list */}
+                            {invitedUsers.length > 0 && (
+                                <div className="space-y-2">
+                                    {invitedUsers.map((userId) => (
+                                        <div 
+                                            key={userId} 
+                                            className="flex items-center justify-between p-2 bg-muted rounded-md"
+                                        >
+                                            <span className="text-sm">{userId}</span>
+                                            <Button
+                                                variant="ghost"
+                                                size="sm"
+                                                onClick={() => handleRemoveUser(userId)}
+                                                className="h-6 px-2"
                                             >
-                                                <span className="text-sm">{userId}</span>
-                                                <Button
-                                                    variant="ghost"
-                                                    size="sm"
-                                                    onClick={() => handleRemoveUser(userId)}
-                                                    className="h-6 px-2"
-                                                >
-                                                    ✕
-                                                </Button>
-                                            </div>
-                                        ))}
-                                    </div>
-                                )}
-
-                                {/* Add user input */}
-                                <div className="flex gap-2">
-                                    <div className="flex-1">
-                                        <Input
-                                            id="inviteUsers"
-                                            type="text"
-                                            placeholder="Enter user ID"
-                                            value={currentUserId}
-                                            onChange={(e) => {
-                                                setCurrentUserId(e.target.value)
-                                                setUserError("")
-                                            }}
-                                            onKeyPress={(e) => {
-                                                if (e.key === 'Enter') {
-                                                    e.preventDefault()
-                                                    handleAddUser()
-                                                }
-                                            }}
-                                        />
-                                        {userError && (
-                                            <p className="text-sm text-destructive mt-1">{userError}</p>
-                                        )}
-                                    </div>
-                                    <Button
-                                        onClick={handleAddUser}
-                                        disabled={addingUser || !currentUserId.trim()}
-                                        variant="outline"
-                                    >
-                                        {addingUser ? "..." : "Add"}
-                                    </Button>
+                                                ✕
+                                            </Button>
+                                        </div>
+                                    ))}
                                 </div>
-                            </div>
+                            )}
 
-                            <div className="w-full flex gap-2">
-                                <CameraButton onImageCapture={handleImageCapture} />
-                                <Button 
-                                    onClick={handleCreateQuest}
-                                    disabled={!capturedImage || loading}
-                                    className="flex-1"
+                            {/* Add user input */}
+                            <div className="flex gap-2">
+                                <div className="flex-1">
+                                    <Input
+                                        id="inviteUsers"
+                                        type="text"
+                                        placeholder="Enter user ID"
+                                        value={currentUserId}
+                                        onChange={(e) => {
+                                            setCurrentUserId(e.target.value)
+                                            setUserError("")
+                                        }}
+                                        onKeyPress={(e) => {
+                                            if (e.key === 'Enter') {
+                                                e.preventDefault()
+                                                handleAddUser()
+                                            }
+                                        }}
+                                    />
+                                    {userError && (
+                                        <p className="text-sm text-destructive mt-1">{userError}</p>
+                                    )}
+                                </div>
+                                <Button
+                                    onClick={handleAddUser}
+                                    disabled={addingUser || !currentUserId.trim()}
+                                    variant="outline"
                                 >
-                                    Create Quest
+                                    {addingUser ? "..." : "Add"}
                                 </Button>
                             </div>
                         </div>
+
+                        <Button 
+                            onClick={handleStartQuestClick}
+                            className="w-full"
+                        >
+                            Start Quest
+                        </Button>
                     </CardContent>
                 </Card>
+
+                <AlertDialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                    <AlertDialogContent>
+                        <AlertDialogHeader>
+                            <AlertDialogTitle>Start Quest?</AlertDialogTitle>
+                            <AlertDialogDescription>
+                                Are you sure you want to start this quest? Once started, leaving the page will forfeit the quest!
+                            </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                            <AlertDialogCancel onClick={handleCancel}>Cancel</AlertDialogCancel>
+                            <AlertDialogAction onClick={handleConfirm}>Confirm</AlertDialogAction>
+                        </AlertDialogFooter>
+                    </AlertDialogContent>
+                </AlertDialog>
             </div>
         </main>
     )
