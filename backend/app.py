@@ -333,13 +333,8 @@ def get_image():
     quest_id = request.args.get('questId')
     user_id = request.args.get('userId')
 
-    output_dir = os.getenv('IMAGE_DIR')
-    
-    file_path = os.path.join(output_dir, f"{quest_id}_{user_id}")
-    
     try:
-        with open(file_path, 'r') as image_file:
-            image_data = image_file.read().strip()
+        image_data = read_image(quest_id, user_id)
         
         return jsonify({
             'image': image_data
