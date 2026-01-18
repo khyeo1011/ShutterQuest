@@ -87,18 +87,17 @@ export async function completeQuest(questId: string, userId: string, image: any,
     return response.json()
 }
 
-function getQuestDetails(questId: string): QuestDetails {
-    const sample: QuestDetails = {
-        questId: 1,
-        prompt: "test prompt",
-        hostId: "testHost",
-        date: Date.now(),
-        winner: "testUser",
-        participants: [
-            { questId: 1, userId: "testUser1", score: 100, time: 30, photo: null },
-            { questId: 1, userId: "testUser2", score: 80, time: 45, photo: null },
-            { questId: 1, userId: "testUser3", score: 60, time: 60, photo: null },
-        ],
+export async function getQuestDetails(questId: string): Promise<QuestDetails> {
+    const response = await fetch(url + `/api/quest-details/${questId}`, {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json",
+        },
+    })
+    
+    if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`)
     }
-    return sample
+    
+    return response.json()
 }
