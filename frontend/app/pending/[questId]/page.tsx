@@ -5,14 +5,32 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { CameraButton } from "@/app/pending/[questId]/components/camera-button"
 import { getPendingQuests } from "@/utils/api"
 import { useRouter } from "next/navigation"
-import { use, useState } from "react"
+import { use, useState, useEffect } from "react"
+import { Quest } from "@/types/types"
 
 export default function QuestDetailsPage({ params }: { params: Promise<{ questId: string }> }) {
   const router = useRouter()
   const { questId } = use(params)
   const [capturedImage, setCapturedImage] = useState<string | null>(null)
-  
-  const quest = getPendingQuests("testUserId").find(q => q.questId === Number(questId))
+  const [quest, setQuest] = useState<Quest | null>(null)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    const fetchQuest = async () => {
+      try {
+        const quests = await getPendingQuests("testUserId")
+        const foundQuest = quests.find(q => q.questId === Number(questId))
+        setQuest(foundQuest || null)
+      } catch (error) {
+        console.error("Failed to fetch quest:", error)
+        setQuest(null)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchQuest()
+  }, [questId])
 
   const handleImageCapture = (imageData: string) => {
     setCapturedImage(imageData)
@@ -22,6 +40,16 @@ export default function QuestDetailsPage({ params }: { params: Promise<{ questId
     if (!capturedImage) return
     console.log("Submitting quest with image:", capturedImage.substring(0, 50) + "...")
     // todo
+  }
+
+  if (loading) {
+    return (
+      <main className="min-h-screen bg-background px-4 py-6">
+        <div className="mx-auto max-w-md">
+          <p className="text-center text-muted-foreground">Loading quest...</p>
+        </div>
+      </main>
+    )
   }
 
   if (!quest) {
