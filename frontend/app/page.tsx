@@ -55,7 +55,7 @@ export default function Page() {
           <CardHeader className="flex flex-row items-center justify-between border-b-4 border-black/10">
             <div className="flex items-center gap-1">
               <Image 
-                src="/newlogo.png" 
+                src="/logo.png" 
                 alt="Shutter Quest Logo" 
                 width={96} 
                 height={96}
