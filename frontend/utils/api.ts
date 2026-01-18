@@ -102,3 +102,26 @@ function getQuestDetails(questId: string): QuestDetails {
     }
     return sample
 }
+
+export async function getUser(userId: string): Promise<boolean> {
+    try {
+        const response = await fetch(`${url}/api/get-user?userId=${encodeURIComponent(userId)}`, {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json",
+            },
+        })
+        
+        if (response.status === 200) {
+            return true
+        } else if (response.status === 404) {
+            return false
+        } else {
+            // Handle unexpected status codes
+            return false
+        }
+    } catch (error) {
+        console.error("Error checking user:", error)
+        return false
+    }
+}
