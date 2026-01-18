@@ -1,7 +1,16 @@
 import { Quest, QuestDetails } from "@/types/types"
 
-function register(userId: string, password: string) {
-    return
+const url = "http://127.0.0.1:5000"
+
+export async function register(userId: string, password: string) {
+    const response = await fetch(url + "/api/register", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ userID: userId, password }),
+    })
+    return response.json()
 }
 
 function login(useId: string, password: string) {
