@@ -3,22 +3,37 @@
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { CameraButton } from "@/app/pending/[questId]/components/camera-button"
-import { getPendingQuests } from "@/utils/api"
+import { getPendingQuests, completeQuest } from "@/utils/api"
 import { useRouter } from "next/navigation"
 import { use, useState, useEffect } from "react"
 import { Quest } from "@/types/types"
+import { useAuth } from "@/contexts/AuthContext"
 
 export default function QuestDetailsPage({ params }: { params: Promise<{ questId: string }> }) {
   const router = useRouter()
   const { questId } = use(params)
+  const { userId } = useAuth()
   const [capturedImage, setCapturedImage] = useState<string | null>(null)
   const [quest, setQuest] = useState<Quest | null>(null)
   const [loading, setLoading] = useState(true)
+  const [elapsedTime, setElapsedTime] = useState(0)
+  const [submitting, setSubmitting] = useState(false)
+
+  // Timer effect - starts when component mounts
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setElapsedTime((prev) => prev + 1)
+    }, 1000)
+
+    return () => clearInterval(timer)
+  }, [])
 
   useEffect(() => {
     const fetchQuest = async () => {
+      if (!userId) return
+      
       try {
-        const quests = await getPendingQuests("testUserId")
+        const quests = await getPendingQuests(userId)
         const foundQuest = quests.find(q => q.questId === Number(questId))
         setQuest(foundQuest || null)
       } catch (error) {
@@ -30,16 +45,39 @@ export default function QuestDetailsPage({ params }: { params: Promise<{ questId
     }
 
     fetchQuest()
-  }, [questId])
+  }, [questId, userId])
 
   const handleImageCapture = (imageData: string) => {
     setCapturedImage(imageData)
   }
 
-  const handleSubmit = () => {
-    if (!capturedImage) return
-    console.log("Submitting quest with image:", capturedImage.substring(0, 50) + "...")
-    // todo
+  const handleSubmit = async () => {
+    if (!capturedImage || !userId) return
+    
+    setSubmitting(true)
+    try {
+      // Remove the data URL prefix (e.g., "data:image/jpeg;base64,")
+      const base64Image = capturedImage.split(',')[1]
+
+      console.log(base64Image)
+      
+      const response = await completeQuest(
+        questId,
+        userId,
+        base64Image,
+        elapsedTime
+      )
+      
+      console.log("Quest completed successfully:", response)
+      
+      // Redirect to completed quests page
+      router.push("/completed")
+    } catch (error) {
+      console.error("Failed to complete quest:", error)
+      alert("Failed to complete quest. Please try again.")
+    } finally {
+      setSubmitting(false)
+    }
   }
 
   if (loading) {
@@ -78,7 +116,12 @@ export default function QuestDetailsPage({ params }: { params: Promise<{ questId
 
         <Card>
           <CardHeader>
-            <CardTitle>Prompt: {quest.prompt}</CardTitle>
+            <CardTitle className="flex justify-between items-center">
+              <span>Prompt: {quest.prompt}</span>
+              <span className="text-sm font-normal">
+                {Math.floor(elapsedTime / 60)}:{(elapsedTime % 60).toString().padStart(2, '0')}
+              </span>
+            </CardTitle>
             <CardDescription>Take a photo of the above prompt!</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -100,10 +143,10 @@ export default function QuestDetailsPage({ params }: { params: Promise<{ questId
                 <CameraButton onImageCapture={handleImageCapture} />
                 <Button 
                   onClick={handleSubmit}
-                  disabled={!capturedImage}
+                  disabled={!capturedImage || submitting}
                   className="flex-1"
                 >
-                  Submit
+                  {submitting ? "Submitting..." : "Submit"}
                 </Button>
               </div>
             </div>
