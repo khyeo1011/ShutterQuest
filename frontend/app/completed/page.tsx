@@ -62,8 +62,19 @@ export default function CompletedPage() {
                       className="w-full justify-start text-left bg-transparent"
                       onClick={() => handleQuestClick(quest.questId)}
                     >
-                      Invited by : {quest.hostId} | ({quest.prompt})
-                    </Button>
+                                            <div className="flex flex-col w-full">
+                                              <div>Artifact: {quest.prompt}</div>
+                                              <div className="flex justify-between w-full text-xs text-muted-foreground mb-2">
+                                                <span className="text-black">Invited By: {quest.hostId}</span>
+                                                <span>
+                                                  {new Date(quest.date * 1000).toLocaleDateString('en-US', {
+                                                    year: 'numeric',
+                                                    month: 'short',
+                                                    day: 'numeric'
+                                                  })}
+                                                </span>
+                                              </div>
+                                            </div>                    </Button>
                   ))}
                   {completedQuests.length === 0 && (
                     <p className="text-center text-muted-foreground">No completed quests available</p>

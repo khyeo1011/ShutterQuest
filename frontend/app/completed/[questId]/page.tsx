@@ -81,7 +81,8 @@ export default function QuestDetailsPage({ params }: { params: Promise<{ questId
   }
 
   const participants = quest.participants || []
-  const winner = quest.winner
+  const allParticipantsFinished = participants.every(p => p.score != null)
+  const winner = allParticipantsFinished ? quest.winner : null
 
   return (
     <main className="min-h-screen bg-background flex items-center justify-center px-4 py-6">
@@ -152,6 +153,11 @@ export default function QuestDetailsPage({ params }: { params: Promise<{ questId
                 </TableBody>
               </Table>
             </div>
+            {!allParticipantsFinished && (
+              <p className="text-center text-muted-foreground">
+                waiting for other adventurers to finish
+              </p>
+            )}
           </CardContent>
         </Card>
 
