@@ -7,6 +7,7 @@ export async function register(userId: string, password: string) {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
+            "ngrok-skip-browser-warning": "true",
         },
         body: JSON.stringify({ userId: userId, password }),
     })
@@ -18,6 +19,7 @@ export async function login(userId: string, password: string) {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
+            "ngrok-skip-browser-warning": "true",
         },
         body: JSON.stringify({ userId: userId, password }),
     })
@@ -55,6 +57,7 @@ export async function createQuest(prompt: string, hostId: string, userIds: strin
         method: "POST",
         headers: {
             "Content-Type": "application/json",
+            "ngrok-skip-browser-warning": "true",
         },
         body: JSON.stringify({ prompt: prompt, hostId: hostId, userIds: userIds, photo: image, time: time }),
     })
@@ -66,6 +69,7 @@ export async function getPrompt() {
         method: "GET",
         headers: {
             "Content-Type": "application/json",
+            "ngrok-skip-browser-warning": "true",
         },
     })
     
@@ -81,6 +85,7 @@ export async function completeQuest(questId: string, userId: string, image: any,
         method: "POST",
         headers: {
             "Content-Type": "application/json",
+            "ngrok-skip-browser-warning": "true",
         },
         body: JSON.stringify({ questId: questId, userId: userId, photo: image, time: time }),
     })
@@ -92,6 +97,7 @@ export async function getQuestDetails(questId: string): Promise<QuestDetails> {
         method: "GET",
         headers: {
             "Content-Type": "application/json",
+            "ngrok-skip-browser-warning": "true",
         },
     })
     
@@ -108,6 +114,7 @@ export async function getUser(userId: string): Promise<boolean> {
             method: "GET",
             headers: {
                 "Content-Type": "application/json",
+                "ngrok-skip-browser-warning": "true",
             },
         })
         
@@ -116,7 +123,6 @@ export async function getUser(userId: string): Promise<boolean> {
         } else if (response.status === 404) {
             return false
         } else {
-            // Handle unexpected status codes
             return false
         }
     } catch (error) {
