@@ -44,7 +44,7 @@ class DBHelper:
         if not p1_response.data:
             return []
 
-        return [row for row in p1_response.data if row['score'] is None]
+        return [row for row in p1_response.data if row['score'] is None or row['score'] == -1]
     
     def get_quests_completed(self, user_id: str) -> List[Dict[str, Any]]:
         p1_response = self.client.table("participants") \
@@ -71,4 +71,8 @@ class DBHelper:
         new_points = current_points + points_to_add
         
         response = self.client.table("users").update({"points": new_points}).eq("userid", user_id).execute()
+        return response.data[0] if response.data else None
+    
+    def start_quest(self, quest_id: str, user_id: str) -> Optional[Dict[str, Any]]:
+        response = self.client.table("participants").update({"score": -1, "timetaken": -1}).eq("questid", quest_id).eq("userid", user_id).execute()
         return response.data[0] if response.data else None

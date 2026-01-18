@@ -369,6 +369,27 @@ def get_points():
     return jsonify({
         'points': points
     }), 200
+    
+@app.route('/api/start-quest', methods=['POST','OPTIONS'])
+def start_quest():
+    if request.method == 'OPTIONS':
+        return '', 204
+    quest_id = request.args.get('questId')
+    user_id = request.args.get('userId')
+
+    
+    quest = db_helper.start_quest(quest_id, user_id)
+    
+    if not quest:
+        return jsonify({
+            'message': 'Quest not found'
+        }), 404
+        
+    return jsonify({
+        'message': 'Quest started successfully'
+    }), 200
+    
+    
 
 if __name__ == '__main__':
     app.run(debug=True, port=5000)

@@ -3,11 +3,12 @@
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { CameraButton } from "@/app/pending/[questId]/components/camera-button"
-import { getPendingQuests, completeQuest } from "@/utils/api"
+import { getPendingQuests, completeQuest, markstartQuest, getQuestDetails } from "@/utils/api"
 import { useRouter } from "next/navigation"
 import { use, useState, useEffect } from "react"
 import { Quest } from "@/types/types"
 import { useAuth } from "@/contexts/AuthContext"
+import { start } from "repl"
 
 export default function QuestDetailsPage({ params }: { params: Promise<{ questId: string }> }) {
   const router = useRouter()
@@ -30,9 +31,14 @@ export default function QuestDetailsPage({ params }: { params: Promise<{ questId
     const fetchQuest = async () => {
       if (!userId) return
       try {
-        const quests = await getPendingQuests(userId)
-        const foundQuest = quests.find(q => q.questId === Number(questId))
-        setQuest(foundQuest || null)
+        const questDetails = await getQuestDetails(questId)
+        const gotQuest: Quest = {
+          questId: Number(questId),
+          hostId: questDetails.hostId,
+          prompt: questDetails.prompt,
+          date: questDetails.date
+        }
+        setQuest(gotQuest)
       } catch (error) {
         console.error("Failed to fetch quest:", error)
         setQuest(null)
@@ -41,6 +47,17 @@ export default function QuestDetailsPage({ params }: { params: Promise<{ questId
       }
     }
     fetchQuest()
+    const startQuest = async () => {
+      if (!userId) return
+      try {
+        await markstartQuest(questId, userId);}
+      catch (error) {
+        console.error("Failed to start quest:", error)
+        alert("Failed to start quest. Please try again.")
+        router.push("/pending")
+      }
+    }
+    startQuest()
   }, [questId, userId])
 
   const handleImageCapture = (imageData: string) => {

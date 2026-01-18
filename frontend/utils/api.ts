@@ -168,3 +168,19 @@ export async function getImage(questId: string, userId: string): Promise<string>
     const data = await response.json();
     return data.image;
 }
+
+export async function markstartQuest(questId: string, userId: string) {
+    const response = await fetch(url + `/api/start-quest?questId=${questId}&userId=${userId}`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "ngrok-skip-browser-warning": "true",
+        },
+    });
+    if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data.image;
+}
